@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Валюты</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <h1 class="mb-4">Список валют</h1>
+
+    <!-- Таблица валют -->
+    <table id="currenciesTable" class="table table-bordered table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Код валюты</th>
+            <th>Курс к рублю</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="currency : ${currencies}">
+            <td th:text="${currency.id}"></td>
+            <td th:text="${currency.code}"></td>
+            <td th:text="${currency.currency}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Добавить валюту</h2>
+    <form id="currencyForm">
+        <div class="mb-3">
+            <label class="form-label">Название валюты</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Код валюты</label>
+            <input type="text" id="code" name="code" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Курс к рублю</label>
+            <input type="number" id="currency" name="currency" step="0.01" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Добавить</button>
+    </form>
+
+    <div class="mt-4">
+        <a href="/" class="btn btn-secondary">На главную</a>
+    </div>
+</div>
+
+<script>
+    // JavaScript для асинхронной отправки формы
+    document.getElementById('currencyForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Отключаем обычную отправку формы
+
+        const name = document.getElementById('name').value;
+        const code = document.getElementById('code').value;
+        const currency = document.getElementById('currency').value;
+
+        const response = await fetch('/currencies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, code, currency })
+        });
+
+        if (response.ok) {
+            const newCurrency = await response.json();
+            addCurrencyToTable(newCurrency);
+            document.getElementById('currencyForm').reset(); // Очистить форму
+        } else {
+            alert('Ошибка при добавлении валюты');
+        }
+    });
+
+    // Функция для добавления новой валюты в таблицу
+    function addCurrencyToTable(currency) {
+        const tbody = document.querySelector('#currenciesTable tbody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+        <td>${currency.id}</td>
+        <td>${currency.code}</td>
+        <td>${currency.currency}</td>
+    `;
+        tbody.appendChild(row);
+    }
+</script>
+
+</body>
+</html>
